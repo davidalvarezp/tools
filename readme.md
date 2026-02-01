@@ -8,7 +8,7 @@ All tools are built with plain HTML, CSS, and JavaScript, and are designed to wo
 
 ---
 
-## ✨ Why local-first?
+## Why local-first?
 
 Most “online tools” upload your files to a server.
 These tools don’t.
@@ -20,7 +20,7 @@ These tools don’t.
 
 ---
 
-## 🛠️ Tools
+## Tools
 
 - **Remove Image Metadata**  
   Strip EXIF metadata from images locally in your browser.
@@ -29,14 +29,33 @@ These tools don’t.
 
 ---
 
-## 🚀 Usage
+## Usage
 
 You can use the tools directly from the website:
 
-👉 [davidalvarezp.github.io/local-first-tools/](https://davidalvarezp.github.io/local-first-tools/)
+ -> [davidalvarezp.github.io/local-first-tools/](https://davidalvarezp.github.io/local-first-tools/)
 
 Or clone the repository and run them locally:
 
 ```bash
 git clone https://github.com/davidalvarezp/local-first-tools.git
 cd local-first-tools
+```
+
+Then open any tool in your browser.
+
+## Privacy
+
+This project does not collect any data.
+
+- No uploads
+- No tracking
+- No analytics
+- No cookies
+
+Everything runs locally in your browser.
+
+## License
+
+Check LICENSE file.
+
