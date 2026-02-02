@@ -1,1 +1,67 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Remove Image Metadata — Local-First Tools</title>
+
+    <!-- SEO -->
+    <meta name="description" content="Remove EXIF metadata from images locally in your browser. No uploads, no tracking, works offline.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Global styles -->
+    <link rel="stylesheet" href="../../css/style.css">
+
+    <!-- Tool-specific styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="layout">
+    <aside id="sidebar"></aside>
+
+    <main class="content">
+        <h1>Remove Image Metadata</h1>
+        <p class="subtitle">
+            Strip EXIF metadata from images locally in your browser.
+            No uploads. No tracking.
+        </p>
+
+        <!-- Ad slot (future) -->
+        <div class="ad-slot">
+            Ad space (coming later)
+        </div>
+
+        <section class="tool-wrapper">
+            <div id="dropArea" class="drop-area">
+                Drag & drop images here or click to select
+            </div>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                multiple
+                hidden
+            >
+
+            <div id="images" class="images-grid"></div>
+
+            <p class="privacy-note">
+                All processing happens locally in your browser.
+                Your files never leave your device.
+            </p>
+        </section>
+    </main>
+</div>
+
+<!-- Global layout loader -->
+<script src="../../js/includes.js"></script>
+
+<!-- Tool logic -->
+<script src="script.js"></script>
+
+</body>
+</html>
