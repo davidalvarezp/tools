@@ -98,7 +98,7 @@
                 const zip = await JSZip.loadAsync(zipFile);
                 const BASE = "connections/followers_and_following/";
 
-                /* Followers (may be multiple files) */
+                // Followers (puede haber múltiples archivos)
                 const followerFiles = Object.keys(zip.files)
                     .filter(f => f.startsWith(BASE + "followers_") && f.endsWith(".json"));
 
@@ -109,21 +109,21 @@
                 let followers = [];
                 for (const file of followerFiles) {
                     const content = await zip.files[file].async("string");
-                    followers.push(...JSON.parse(content));
+                    const json = JSON.parse(content);
+                    followers.push(...json); // array de objetos
                 }
 
-                /* Following */
+                // Following
                 const followingFile = zip.files[BASE + "following.json"];
                 if (!followingFile) {
                     throw new Error("following.json not found");
                 }
 
-                const followingJSON = JSON.parse(
-                    await followingFile.async("string")
-                ).relationships_following;
+                const followingJSON = JSON.parse(await followingFile.async("string")); // array de objetos
 
+                // Función de extracción robusta
                 const extract = (arr) =>
-                    arr.map(e => e.string_list_data?.[0]?.value).filter(Boolean);
+                    arr.map(e => e.string_list_data?.[0]?.value || e.value || e).filter(Boolean);
 
                 const followersSet = new Set(extract(followers));
                 const followingSet = new Set(extract(followingJSON));
