@@ -1,16 +1,17 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const menuToggle = document.querySelector('.menu-toggle');
+document.addEventListener("click", (e) => {
 
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            document.body.classList.toggle('sidebar-open');
-        });
+    // Toggle sidebar al hacer click en la hamburguesa
+    if (e.target.closest(".menu-toggle")) {
+        e.stopPropagation();
+        document.body.classList.toggle("sidebar-open");
+        return;
     }
 
-    // Opcional: cerrar sidebar al hacer click fuera
-    document.addEventListener('click', e => {
-        if (!e.target.closest('#sidebar') && !e.target.closest('.menu-toggle')) {
-            document.body.classList.remove('sidebar-open');
-        }
-    });
+    // Cerrar sidebar al hacer click fuera
+    if (
+        document.body.classList.contains("sidebar-open") &&
+        !e.target.closest("#sidebar")
+    ) {
+        document.body.classList.remove("sidebar-open");
+    }
 });
