@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metadata Viewer | Local-First Tools</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/assets/images/favicon.webp" type="image/webp">
+
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <style>
+        /* ===== Metadata Viewer (custom) ===== */
+
+        .tool-wrapper {
+            margin-top: 32px;
+        }
+
+        .drop-area {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 48px 20px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: border 0.2s, background 0.2s;
+        }
+
+        .drop-area strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .drop-area span {
+            font-size: 0.85rem;
+        }
+
+        .drop-area.hover {
+            border-color: var(--accent);
+            background: #0f172a;
+        }
+
+        .tool-actions {
+            margin-top: 24px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tool-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .tool-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .tool-controls button {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            background: var(--accent);
+            color: #000;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tool-controls button.secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .tool-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .meta-card {
+            border: 1px solid var(--border);
+            background: #0e0e0e;
+            border-radius: 12px;
+            padding: 10px;
+            word-break: break-word;
+        }
+
+        .meta-card .file-name {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .meta-card .metadata {
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            color: var(--text-main);
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        .meta-card button {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            background: var(--accent);
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .privacy-note {
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="layout">
+    <aside id="sidebar-left"></aside>
+
+    <main class="content">
+        <div class="content-inner">
+            <section class="page-content">
+                <h1>Metadata Viewer</h1>
+                <p>
+                    View image EXIF metadata locally in your browser. No uploads, no tracking.
+                </p>
+
+                <section class="tool-wrapper">
+
+                    <div id="dropArea" class="drop-area">
+                        <strong>Drag & drop images</strong>
+                        <span>or click to select files</span>
+                    </div>
+
+                    <input type="file" id="fileInput" accept="image/*" multiple hidden>
+
+                    <div class="tool-actions">
+                        <div class="tool-controls">
+                            <span class="tool-info" id="fileCount">0 files loaded</span>
+                            <button id="viewBtn" disabled>View Metadata</button>
+                            <button id="clearBtn" class="secondary">Clear</button>
+                        </div>
+                    </div>
+
+                    <div id="metadata" class="images-grid"></div>
+
+                    <p class="privacy-note">
+                        All processing happens locally in your browser. Your files never leave your device.
+                    </p>
+
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div id="footer"></div>
+
+<script src="/assets/js/includes.js"></script>
+<script src="/assets/js/ui.js"></script>
+
+<!-- Exif.js library for reading metadata -->
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
+<script>
+/* ===== Metadata Viewer Logic ===== */
+
+(() => {
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const metadataGrid = document.getElementById('metadata');
+    const viewBtn = document.getElementById('viewBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const fileCount = document.getElementById('fileCount');
+
+    let files = [];
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+    dropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        dropArea.classList.remove('hover');
+        addFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', () => addFiles(fileInput.files));
+
+    function addFiles(list) {
+        Array.from(list).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                files.push(file);
+            }
+        });
+        updateState();
+    }
+
+    function updateState() {
+        fileCount.textContent = `${files.length} files loaded`;
+        viewBtn.disabled = files.length === 0;
+    }
+
+    viewBtn.addEventListener('click', () => {
+        metadataGrid.innerHTML = '';
+        files.forEach(file => extractMetadata(file));
+    });
+
+    function extractMetadata(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                EXIF.getData(img, function() {
+                    const tags = EXIF.getAllTags(this);
+                    const metadataStr = Object.keys(tags).length ? JSON.stringify(tags, null, 2) : 'No metadata found';
+
+                    renderCard(file.name, metadataStr);
+                });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function renderCard(fileName, metadataStr) {
+        const card = document.createElement('div');
+        card.className = 'meta-card';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'file-name';
+        nameEl.textContent = fileName;
+
+        const metaEl = document.createElement('pre');
+        metaEl.className = 'metadata';
+        metaEl.textContent = metadataStr;
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Download Metadata';
+        btn.onclick = () => downloadMetadata(fileName, metadataStr);
+
+        card.appendChild(nameEl);
+        card.appendChild(metaEl);
+        card.appendChild(btn);
+        metadataGrid.appendChild(card);
+    }
+
+    function downloadMetadata(fileName, metadataStr) {
+        const blob = new Blob([metadataStr], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${fileName}.metadata.txt`;
+        a.click();
+    }
+
+    clearBtn.addEventListener('click', () => {
+        files = [];
+        metadataGrid.innerHTML = '';
+        updateState();
+    });
+})();
+</script>
+
+</body>
+</html>
