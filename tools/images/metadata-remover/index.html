@@ -1,200 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Remove Image Metadata — Local-First Tools</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/assets/css/style.css">
+<meta charset="UTF-8">
+<title>Remove Image Metadata — Local-First Tools</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        /* === Tool-specific styles === */
-        .tool-wrapper {
-            margin-top: 32px;
-        }
+<style>
+:root{
+    --bg:#0b0b0b;
+    --panel:#111;
+    --border:#222;
+    --text:#e5e5e5;
+    --muted:#9ca3af;
+    --accent:#22c55e;
+}
 
-        .drop-area {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 48px 20px;
-            text-align: center;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: border 0.2s, background 0.2s;
-        }
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
 
-        .drop-area.hover {
-            border-color: var(--accent);
-            background: #0f172a;
-        }
+main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:48px 20px 80px;
+}
 
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
-            margin-top: 32px;
-        }
+h1{
+    font-size:2rem;
+    margin:0 0 8px;
+}
+.subtitle{
+    color:var(--muted);
+    max-width:600px;
+}
 
-        .image-card {
-            border: 1px solid var(--border);
-            background: #0e0e0e;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
+/* Tool */
+.tool{
+    margin-top:40px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:28px;
+}
 
-        .image-card img {
-            width: 100%;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
+/* Drop area */
+.drop-area{
+    border:2px dashed var(--border);
+    border-radius:14px;
+    padding:48px 20px;
+    text-align:center;
+    cursor:pointer;
+    color:var(--muted);
+    transition:.2s;
+}
+.drop-area.hover{
+    border-color:var(--accent);
+    background:#0f1a13;
+    color:#d1fae5;
+}
 
-        .image-card button {
-            background: var(--accent);
-            border: none;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #000;
-            font-weight: 600;
-        }
+/* Toolbar */
+.toolbar{
+    margin-top:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+.counter{
+    font-size:.9rem;
+    color:var(--muted);
+}
+.actions button{
+    background:#1f2937;
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:.85rem;
+}
+.actions button:hover{opacity:.9}
 
-        .image-card button:hover {
-            opacity: 0.9;
-        }
+/* Grid */
+.grid{
+    margin-top:28px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:20px;
+}
 
-        .privacy-note {
-            margin-top: 24px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-    </style>
+/* Card */
+.card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    background:#0e0e0e;
+    text-align:center;
+}
+.card img{
+    width:100%;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+.card button{
+    width:100%;
+    background:var(--accent);
+    border:none;
+    border-radius:8px;
+    padding:8px;
+    cursor:pointer;
+    font-size:.85rem;
+    font-weight:600;
+    color:#052e16;
+}
+.card button:hover{opacity:.9}
+
+.note{
+    margin-top:24px;
+    font-size:.85rem;
+    color:var(--muted);
+}
+</style>
 </head>
+
 <body>
+<main>
+    <h1>Remove Image Metadata</h1>
+    <p class="subtitle">
+        Remove EXIF metadata from images directly in your browser.
+        No uploads. No tracking. 100% local.
+    </p>
 
-    <!-- Header -->
-    <div id="header"></div>
+    <section class="tool">
+        <div id="dropArea" class="drop-area">
+            Drag & drop images here<br>
+            or click to select files
+        </div>
 
-    <!-- Main layout -->
-    <div class="layout">
-        <!-- Sidebar izquierdo -->
-        <aside id="sidebar-left"></aside>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
 
-        <!-- Contenido principal -->
-        <main class="content">
-            <div class="content-inner">
-                <section class="page-content">
-                    <h1>Remove Image Metadata</h1>
-                    <p class="subtitle">
-                        Strip EXIF metadata from images locally in your browser.
-                        No uploads. No tracking.
-                    </p>
-
-                    <section class="tool-wrapper">
-                        <div id="dropArea" class="drop-area">
-                            Drag & drop images here or click to select
-                        </div>
-
-                        <input
-                            type="file"
-                            id="fileInput"
-                            accept="image/*"
-                            multiple
-                            hidden
-                        >
-
-                        <div id="images" class="images-grid"></div>
-
-                        <p class="privacy-note">
-                            All processing happens locally in your browser.
-                            Your files never leave your device.
-                        </p>
-                    </section>
-                </section>
+        <div class="toolbar">
+            <div id="counter" class="counter">No images processed</div>
+            <div class="actions">
+                <button id="clearBtn">Clear</button>
             </div>
-        </main>
+        </div>
 
-        <!-- Sidebar derecho -->
-        <aside class="sidebar-right"></aside>
-    </div>
+        <div id="grid" class="grid"></div>
 
-    <!-- Footer -->
-    <div id="footer"></div>
+        <p class="note">
+            Metadata is removed by re-encoding the image via canvas.
+            Your files never leave your device.
+        </p>
+    </section>
+</main>
 
-    <!-- Scripts -->
-    <script src="/assets/js/includes.js"></script>
-    <script src="/assets/js/ui.js"></script>
+<script>
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+const grid = document.getElementById('grid');
+const counter = document.getElementById('counter');
+const clearBtn = document.getElementById('clearBtn');
 
-    <script>
-        // Remove Metadata logic
-        const dropArea = document.getElementById('dropArea');
-        const fileInput = document.getElementById('fileInput');
-        const imagesGrid = document.getElementById('images');
+let total = 0;
 
-        dropArea.addEventListener('click', () => fileInput.click());
+dropArea.onclick = () => fileInput.click();
 
-        dropArea.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropArea.classList.add('hover');
-        });
+dropArea.ondragover = e => {
+    e.preventDefault();
+    dropArea.classList.add('hover');
+};
+dropArea.ondragleave = () => dropArea.classList.remove('hover');
+dropArea.ondrop = e => {
+    e.preventDefault();
+    dropArea.classList.remove('hover');
+    handleFiles(e.dataTransfer.files);
+};
 
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('hover');
-        });
+fileInput.onchange = () => handleFiles(fileInput.files);
 
-        dropArea.addEventListener('drop', e => {
-            e.preventDefault();
-            dropArea.classList.remove('hover');
-            handleFiles(e.dataTransfer.files);
-        });
+clearBtn.onclick = () => {
+    grid.innerHTML = '';
+    total = 0;
+    updateCounter();
+};
 
-        fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+function updateCounter(){
+    counter.textContent =
+        total === 0 ? 'No images processed' : `${total} image${total>1?'s':''} cleaned`;
+}
 
-        function handleFiles(files) {
-            Array.from(files).forEach(file => {
-                if (!file.type.startsWith('image/')) return;
+function handleFiles(files){
+    [...files].forEach(file=>{
+        if(!file.type.startsWith('image/')) return;
 
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = new Image();
-                    img.onload = () => {
-                        // Create a canvas to remove metadata
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
+        const reader = new FileReader();
+        reader.onload = e=>{
+            const img = new Image();
+            img.onload = ()=>{
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.getContext('2d').drawImage(img,0,0);
 
-                        // Convert canvas to blob
-                        canvas.toBlob(blob => {
-                            const url = URL.createObjectURL(blob);
+                canvas.toBlob(blob=>{
+                    const url = URL.createObjectURL(blob);
 
-                            const card = document.createElement('div');
-                            card.className = 'image-card';
+                    const card = document.createElement('div');
+                    card.className = 'card';
 
-                            const imageEl = document.createElement('img');
-                            imageEl.src = url;
+                    const image = document.createElement('img');
+                    image.src = url;
 
-                            const button = document.createElement('button');
-                            button.textContent = 'Download clean image';
-                            button.onclick = () => {
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `clean_${file.name}`;
-                                a.click();
-                            };
-
-                            card.appendChild(imageEl);
-                            card.appendChild(button);
-                            imagesGrid.appendChild(card);
-                        }, 'image/png');
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Download clean image';
+                    btn.onclick = ()=>{
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `clean_${file.name}`;
+                        a.click();
                     };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-    </script>
 
+                    card.append(image,btn);
+                    grid.appendChild(card);
+
+                    total++;
+                    updateCounter();
+                },'image/png');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+</script>
 </body>
 </html>
